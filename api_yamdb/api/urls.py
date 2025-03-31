@@ -10,6 +10,8 @@ app_name = 'api'
 
 router = routers.DefaultRouter()
 
+router.register('users', views.UserViewSet, basename='users')
+
 auth_urls = [
     path('token/', views.get_token, name='get_token'),
     path('signup/', views.signup, name='signup')

@@ -1,5 +1,3 @@
-import random
-
 from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
@@ -8,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
@@ -16,7 +15,7 @@ from .permissions import (
     IsAdmin,
 )
 from .serializers import (
-    MeUserSerializer,
+    OwnerUserSerializer,
     SignUpSerializer,
     TokenSerializer,
     UserSerializer
@@ -76,24 +75,28 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (SearchFilter,)
     search_fields = ('username',)
     lookup_field = 'username'
+    pagination_class = PageNumberPagination
     http_method_names = ('get', 'post', 'patch', 'delete')
 
     @action(
         ['GET', 'PATCH'],
         detail=False,
-        permission_classes=(IsAuthenticated,)
+        permission_classes=(IsAuthenticated,),
+        url_path='me'
     )
-    def me(self, request):
+    def user_own_account(self, request):
         user = get_object_or_404(
             User,
             pk=request.user.id
         )
         if request.method == 'PATCH':
-            serializer = MeUserSerializer(
-                user, data=request.data, partial=True
+            serializer = OwnerUserSerializer(
+                user,
+                data=request.data,
+                partial=True
             )
             serializer.is_valid(raise_exception=True)
             serializer.save(role=user.role)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        serializer = MeUserSerializer(request.user)
+        serializer = OwnerUserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
