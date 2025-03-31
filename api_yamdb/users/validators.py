@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 def validate_username(username):
     if username.lower() in ('me',):
         raise ValidationError(
-            f'Зарезервированный логин {username}, нельзя использлвать'
+            f'Зарезервированный логин {username}, нельзя использолвать'
         )
     if not re.match(r'^[\w.@+-]+\Z', username):
         raise ValidationError(
