@@ -11,6 +11,9 @@ app_name = 'api'
 router = routers.DefaultRouter()
 
 router.register('users', views.UserViewSet, basename='users')
+router.register('categories', views.CategoriesViewSet, basename='categories')
+router.register('titles', views.UserViewSet, basename='titles')
+
 
 auth_urls = [
     path('token/', views.get_token, name='get_token'),

@@ -12,7 +12,7 @@ MAX_LENGTH_SLUG = 50
 class BaseClass(models.Model):
     """Абстрактная базовая модель для категорий и жанров."""
 
-    title = models.CharField(
+    name = models.CharField(
         'Наименование',
         max_length=MAX_LENGTH_TITLE,
         help_text=f'Название макс. {MAX_LENGTH_TITLE} символов'
