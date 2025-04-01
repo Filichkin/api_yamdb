@@ -1,4 +1,4 @@
-from django.core.validators import MaxValueValidator, MinValueValidator
+from .validations import validations_year
 from django.db import models
 
 from .constants import MAX_LENGTH_SLUG, MAX_LENGTH_TITLE, MAX_YEAR, MIN_YEAR
@@ -69,11 +69,9 @@ class Titles(models.Model):
     year = models.IntegerField(
         verbose_name='Год',
         validators=[
-            MinValueValidator(MIN_YEAR),
-            MaxValueValidator(MAX_YEAR)
+            validations_year
         ],
-        db_index=True,
-        help_text=f'Год выпуска (от {MIN_YEAR} до {MAX_YEAR})'
+        help_text='Год выпуска не позднее текущего'
     )
     description = models.TextField(
         verbose_name='Описание',
