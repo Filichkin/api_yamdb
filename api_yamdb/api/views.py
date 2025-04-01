@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
@@ -13,8 +13,13 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from .permissions import (
     IsAdmin,
+    IsAdminOrReadOnly,
+    IsAuthorOrModeratorOrAdmin
 )
+from reviews.models import Categories, Genres
 from .serializers import (
+    CategorySerializer,
+    GenreSerializer,
     OwnerUserSerializer,
     SignUpSerializer,
     TokenSerializer,
@@ -73,7 +78,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
     filter_backends = (SearchFilter,)
-    search_fields = ('username',)
+    search_fields = ('^username',)
     lookup_field = 'username'
     pagination_class = PageNumberPagination
     http_method_names = ('get', 'post', 'patch', 'delete')
@@ -100,3 +105,39 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         serializer = OwnerUserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class BaseCategoryGenreViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    """
+    Базовый класс категорий и жанров.
+    """
+
+    permission_classes = (IsAdminOrReadOnly,)
+    lookup_field = 'slug'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+
+class CategoryViewSet(BaseCategoryGenreViewSet):
+    """
+    Позволяет получить список, создать или удалить категорию.
+    Обрабатывает все запросы для эндпоинта api/v1/categories/.
+    """
+
+    queryset = Categories.objects.all()
+    serializer_class = CategorySerializer
+
+
+class GenreViewSet(BaseCategoryGenreViewSet):
+    """
+    Выполняет все операции с жанрами.
+    Обрабатывает все запросы для эндпоинта api/v1/genres/.
+    """
+
+    queryset = Genres.objects.all()
+    serializer_class = GenreSerializer

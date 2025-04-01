@@ -7,7 +7,7 @@ from .constants import (
     MAX_LENGTH_TEXT
 )
 from users.models import User
-from .validators import validate_for_year
+from .validators import validate_for_year, validate_slug
 
 
 class CategoriesGenreModel(models.Model):
@@ -16,6 +16,7 @@ class CategoriesGenreModel(models.Model):
     slug = models.SlugField(
         verbose_name='Cлаг',
         max_length=MAX_LENGTH_SLUG,
+        validators=(validate_slug,),
         unique=True,
         db_index=True
     )
@@ -26,6 +27,7 @@ class CategoriesGenreModel(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['name']
 
     def __str__(self):
         return f'Название - {self.name}'
