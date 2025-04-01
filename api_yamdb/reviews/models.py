@@ -1,24 +1,19 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-MIN_YEAR = 1900
-MAX_YEAR = 2025
-MIN_RATING = 1
-MAX_RATING = 10
-MAX_LENGTH_TITLE = 128
-MAX_LENGTH_SLUG = 50
+from .constants import MAX_LENGTH_SLUG, MAX_LENGTH_TITLE, MAX_YEAR, MIN_YEAR
 
 
 class BaseClass(models.Model):
     """Абстрактная базовая модель для категорий и жанров."""
 
     name = models.CharField(
-        'Наименование',
+        verbose_name='Наименование',
         max_length=MAX_LENGTH_TITLE,
         help_text=f'Название макс. {MAX_LENGTH_TITLE} символов'
     )
     slug = models.SlugField(
-        'Идентификатор',
+        verbose_name='Идентификатор',
         max_length=MAX_LENGTH_SLUG,
         unique=True,
         help_text='Идентификатор страницы для URL; разрешены символы латиницы,'
@@ -37,25 +32,25 @@ class Category(BaseClass):
         verbose_name_plural = 'Категории'
 
     def __str__(self):
-        return f'Категория: {self.title}'
+        return f'Категория: {self.name}'
 
 
 class Genre(BaseClass):
     """Модель жанра произведения."""
 
-    def __str__(self):
-        return f'Жанр: {self.title}'
-
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+
+    def __str__(self):
+        return f'Жанр: {self.name}'
 
 
 class Titles(models.Model):
     """Модель произведения (фильма, книги и т.д.)."""
 
     name = models.CharField(
-        'Наименование',
+        verbose_name='Наименование',
         max_length=MAX_LENGTH_TITLE,
         help_text=f'Название произведения (макс. {MAX_LENGTH_TITLE} символов)'
     )
@@ -72,7 +67,7 @@ class Titles(models.Model):
         related_name='titles',
     )
     year = models.IntegerField(
-        'Год',
+        verbose_name='Год',
         validators=[
             MinValueValidator(MIN_YEAR),
             MaxValueValidator(MAX_YEAR)
@@ -81,19 +76,9 @@ class Titles(models.Model):
         help_text=f'Год выпуска (от {MIN_YEAR} до {MAX_YEAR})'
     )
     description = models.TextField(
-        'Описание',
+        verbose_name='Описание',
         null=True,
         blank=True,
-        default=''
-    )
-    rating = models.IntegerField(
-        'Рейтинг',
-        validators=[
-            MinValueValidator(MIN_RATING),
-            MaxValueValidator(MAX_RATING)
-        ],
-        null=True,
-        blank=True
     )
 
     class Meta:
