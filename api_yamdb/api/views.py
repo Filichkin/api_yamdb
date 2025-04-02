@@ -2,6 +2,8 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
+from django.db.models import Avg
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view
@@ -11,17 +13,20 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
+from .filters import TitlesFilter
 from .permissions import (
     IsAdmin,
     IsAdminOrReadOnly,
     IsAuthorOrModeratorOrAdmin
 )
-from reviews.models import Categories, Genres
+from reviews.models import Categories, Genres, Titles
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
     OwnerUserSerializer,
     SignUpSerializer,
+    TitleReadSerializer,
+    TitleWriteSerializer,
     TokenSerializer,
     UserSerializer
 )
@@ -141,3 +146,21 @@ class GenreViewSet(BaseCategoryGenreViewSet):
 
     queryset = Genres.objects.all()
     serializer_class = GenreSerializer
+
+
+class TitlesViewSet(viewsets.ModelViewSet):
+    """Выполняет все операции с произведениями.
+    Обрабатывает все запросы для эндпоинта api/v1/titles/.
+    """
+
+    permission_classes = (IsAdminOrReadOnly,)
+    queryset = Titles.objects.annotate(
+        rating=Avg('reviews__score')
+    ).select_related('category').order_by('category__name', '-rating')
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitlesFilter
+
+    def get_serializer_class(self):
+        if self.action in {'create', 'partial_update'}:
+            return TitleWriteSerializer
+        return TitleReadSerializer

@@ -123,6 +123,7 @@ class Reviews(ReviewsCommentsModel):
     title = models.ForeignKey(
         Titles,
         on_delete=models.CASCADE,
+        related_name='reviews',
         verbose_name='Произведения',
     )
     score = models.PositiveSmallIntegerField(

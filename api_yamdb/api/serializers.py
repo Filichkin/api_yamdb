@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from reviews.models import Categories, Genres
+from reviews.models import Categories, Genres, Titles
 from users.constants import (
     MAX_LENGTH_EMAIL,
     MAX_LENGTH_NAME
@@ -72,3 +72,57 @@ class GenreSerializer(serializers.ModelSerializer):
             'name',
             'slug',
         )
+
+
+class TitleReadSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор только для чтения данных.
+    Возвращает JSON-данные всех полей модели Title
+    для эндпоинта api/v1/titles/.
+    Добавляет новое поле rating.
+    """
+
+    rating = serializers.IntegerField(read_only=True)
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(read_only=True, many=True)
+
+    class Meta:
+        fields = (
+            'id',
+            'name',
+            'year',
+            'description',
+            'genre',
+            'category',
+            'rating'
+        )
+        model = Titles
+
+
+class TitleWriteSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор только для записи данных.
+    Возвращает JSON-данные всех полей модели Title
+    для эндпоинта api/v1/titles/.
+    """
+
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Categories.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genres.objects.all(),
+        many=True
+    )
+
+    class Meta:
+        fields = (
+            'id',
+            'name',
+            'year',
+            'description',
+            'genre',
+            'category'
+        )
+        model = Titles
