@@ -11,12 +11,13 @@ from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Category
+from reviews.models import Category, Genre, Titles
 from users.models import User
 
 from .permissions import IsAdmin
-from .serializers import (CategorySerializer, OwnerUserSerializer,
-                          SignUpSerializer, TokenSerializer, UserSerializer)
+from .serializers import (CategorySerializer, GenreSerializer,
+                          OwnerUserSerializer, SignUpSerializer,
+                          TitlesSerializer, TokenSerializer, UserSerializer)
 
 
 @api_view(['POST'])
@@ -105,3 +106,23 @@ class CategoriesViewSet(viewsets.ModelViewSet):
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
+
+
+class GenreVeiwset(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
+
+
+class TitlesViewset(viewsets.ModelViewSet):
+    queryset = Titles.objects.all()
+    serializer_class = TitlesSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('name', 'description')
+    lookup_field = 'pk'
+    pagination_class = PageNumberPagination
+    http_method_names = ('get', 'post', 'patch', 'delete')

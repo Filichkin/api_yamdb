@@ -53,7 +53,7 @@ class CategorySerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
 
-class GenreSerializer(serializers.Serializer):
+class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre

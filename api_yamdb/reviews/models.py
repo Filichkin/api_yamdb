@@ -1,7 +1,7 @@
 from .validations import validations_year
 from django.db import models
 
-from .constants import MAX_LENGTH_SLUG, MAX_LENGTH_TITLE, MAX_YEAR, MIN_YEAR
+from .constants import MAX_LENGTH_SLUG, MAX_LENGTH_TITLE
 
 
 class BaseClass(models.Model):
