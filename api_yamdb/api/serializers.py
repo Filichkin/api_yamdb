@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from reviews.models import Categories, Genres, Reviews, Titles
+from reviews.models import Category, Genre, Review, Title
 from users.constants import (
     MAX_LENGTH_EMAIL,
     MAX_LENGTH_NAME
@@ -56,7 +56,7 @@ class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для запросов по категориям."""
 
     class Meta:
-        model = Categories
+        model = Category
         fields = (
             'name',
             'slug',
@@ -67,7 +67,7 @@ class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для запросов по жанрам."""
 
     class Meta:
-        model = Genres
+        model = Genre
         fields = (
             'name',
             'slug',
@@ -96,7 +96,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
             'category',
             'rating'
         )
-        model = Titles
+        model = Title
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
@@ -108,11 +108,11 @@ class TitleWriteSerializer(serializers.ModelSerializer):
 
     category = serializers.SlugRelatedField(
         slug_field='slug',
-        queryset=Categories.objects.all()
+        queryset=Category.objects.all()
     )
     genre = serializers.SlugRelatedField(
         slug_field='slug',
-        queryset=Genres.objects.all(),
+        queryset=Genre.objects.all(),
         many=True
     )
 
@@ -125,7 +125,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
             'genre',
             'category'
         )
-        model = Titles
+        model = Title
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -147,7 +147,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             'score',
             'pub_date'
         )
-        model = Reviews
+        model = Review
 
     def validate(self, data):
         """Проверка невозможности дважды оставить отзыв на произведение."""
@@ -156,7 +156,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             return data
         title_id = self.context['request'].parser_context['kwargs']['title_id']
         author = self.context['request'].user
-        if Reviews.objects.filter(
+        if Review.objects.filter(
             author=author,
             title_id=title_id
         ).exists():

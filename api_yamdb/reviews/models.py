@@ -10,7 +10,7 @@ from users.models import User
 from .validators import validate_for_year, validate_slug
 
 
-class CategoriesGenreModel(models.Model):
+class CategoryGenreModel(models.Model):
     """Базовый класс для моделей Categories и Genres."""
 
     slug = models.SlugField(
@@ -33,7 +33,7 @@ class CategoriesGenreModel(models.Model):
         return f'Название - {self.name}'
 
 
-class Genres(CategoriesGenreModel):
+class Genre(CategoryGenreModel):
     """
     Модель жанров.
     Одно произведение может быть привязано к нескольким жанрам.
@@ -44,7 +44,7 @@ class Genres(CategoriesGenreModel):
         verbose_name_plural = 'Жанры'
 
 
-class Categories(CategoriesGenreModel):
+class Category(CategoryGenreModel):
     """
     Модель категорий.
     Одно произведение может быть привязано только к одной категории.
@@ -55,7 +55,7 @@ class Categories(CategoriesGenreModel):
         verbose_name_plural = 'Категории'
 
 
-class Titles(models.Model):
+class Title(models.Model):
     """Модель произведений."""
 
     name = models.TextField(
@@ -72,14 +72,14 @@ class Titles(models.Model):
         validators=[validate_for_year]
     )
     category = models.ForeignKey(
-        Categories,
+        Category,
         on_delete=models.SET_NULL,
         null=True,
         related_name='titles',
         verbose_name='Категория',
     )
     genre = models.ManyToManyField(
-        Genres,
+        Genre,
         related_name='titles',
         blank=False,
         verbose_name='Жанр'
@@ -93,7 +93,7 @@ class Titles(models.Model):
         return f'Название - {self.name}'
 
 
-class ReviewsCommentsModel(models.Model):
+class ReviewCommentModel(models.Model):
     """Базовый класс для моделей Review и Comment."""
 
     text = models.TextField(
@@ -114,14 +114,14 @@ class ReviewsCommentsModel(models.Model):
         ordering = ['-pub_date']
 
 
-class Reviews(ReviewsCommentsModel):
+class Review(ReviewCommentModel):
     """
     Модель отзывов.
     Отзыв привязан к определённому произведению.
     """
 
     title = models.ForeignKey(
-        Titles,
+        Title,
         on_delete=models.CASCADE,
         related_name='reviews',
         verbose_name='Произведения',
@@ -137,7 +137,7 @@ class Reviews(ReviewsCommentsModel):
     def __str__(self):
         return self.text[:MAX_LENGTH_TEXT]
 
-    class Meta(ReviewsCommentsModel.Meta):
+    class Meta(ReviewCommentModel.Meta):
         default_related_name = 'reviews'
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
@@ -148,14 +148,14 @@ class Reviews(ReviewsCommentsModel):
         ]
 
 
-class Comments(ReviewsCommentsModel):
+class Comment(ReviewCommentModel):
     """
     Модель комментариев.
     Комментарий привязан к определённому отзыву.
     """
 
     review = models.ForeignKey(
-        Reviews,
+        Review,
         on_delete=models.CASCADE,
         verbose_name='Обзор',
     )
@@ -163,7 +163,7 @@ class Comments(ReviewsCommentsModel):
     def __str__(self):
         self.text[:MAX_LENGTH_TEXT]
 
-    class Meta(ReviewsCommentsModel.Meta):
+    class Meta(ReviewCommentModel.Meta):
         default_related_name = 'comments'
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'

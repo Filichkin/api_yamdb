@@ -22,7 +22,7 @@ from .permissions import (
     IsAdminOrReadOnly,
     IsAuthorOrModeratorOrAdmin
 )
-from reviews.models import Categories, Genres, Titles
+from reviews.models import Category, Genre, Title
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
@@ -138,7 +138,7 @@ class CategoryViewSet(BaseCategoryGenreViewSet):
     Обрабатывает все запросы для эндпоинта api/v1/categories/.
     """
 
-    queryset = Categories.objects.all()
+    queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
@@ -148,7 +148,7 @@ class GenreViewSet(BaseCategoryGenreViewSet):
     Обрабатывает все запросы для эндпоинта api/v1/genres/.
     """
 
-    queryset = Genres.objects.all()
+    queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
 
@@ -158,7 +158,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
     """
 
     permission_classes = (IsAdminOrReadOnly,)
-    queryset = Titles.objects.annotate(
+    queryset = Title.objects.annotate(
         rating=Avg('reviews__score')
     ).select_related('category').order_by('category__name', '-rating')
     filter_backends = (DjangoFilterBackend,)
@@ -186,7 +186,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     http_method_names = ('get', 'post', 'patch', 'delete',)
 
     def get_title(self):
-        return get_object_or_404(Titles, pk=self.kwargs['title_id'])
+        return get_object_or_404(Title, pk=self.kwargs['title_id'])
 
     def get_queryset(self):
         return self.get_title().reviews.select_related(

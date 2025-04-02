@@ -3,11 +3,11 @@ import csv
 from django.core.management.base import BaseCommand, CommandError
 
 from reviews.models import (
-    Titles,
-    Genres,
-    Categories,
-    Reviews,
-    Comments,
+    Title,
+    Genre,
+    Category,
+    Review,
+    Comment,
 )
 from users.models import User
 
@@ -18,17 +18,17 @@ class Command(BaseCommand):
 
     MODELS_FILES = {
         User: 'users.csv',
-        Categories: 'category.csv',
-        Genres: 'genre.csv',
-        Titles: 'titles.csv',
-        Reviews: 'review.csv',
-        Comments: 'comments.csv',
+        Category: 'category.csv',
+        Genre: 'genre.csv',
+        Title: 'titles.csv',
+        Review: 'review.csv',
+        Comment: 'comments.csv',
     }
 
     DIFFERENT_FIELDS = {
-        Reviews: ['author', 'author_id'],
-        Comments: ['author', 'author_id'],
-        Titles: ['category', 'category_id'],
+        Review: ['author', 'author_id'],
+        Comment: ['author', 'author_id'],
+        Title: ['category', 'category_id'],
     }
 
     help = 'Запись в БД данных из csv-файлов'
