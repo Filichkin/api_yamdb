@@ -14,6 +14,11 @@ router.register('users', views.UserViewSet, basename='users')
 router.register('categories', views.CategoryViewSet, basename='categories')
 router.register('genres', views.GenreViewSet, basename='genres')
 router.register('titles', views.TitlesViewSet, basename='titles')
+router.register(
+    r'titles/(?P<title_id>\d+)/reviews',
+    views.ReviewViewSet,
+    basename='reviews'
+)
 
 auth_urls = [
     path('token/', views.get_token, name='get_token'),

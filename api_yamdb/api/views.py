@@ -9,7 +9,10 @@ from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly
+)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -24,6 +27,7 @@ from .serializers import (
     CategorySerializer,
     GenreSerializer,
     OwnerUserSerializer,
+    ReviewSerializer,
     SignUpSerializer,
     TitleReadSerializer,
     TitleWriteSerializer,
@@ -159,8 +163,34 @@ class TitlesViewSet(viewsets.ModelViewSet):
     ).select_related('category').order_by('category__name', '-rating')
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitlesFilter
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
         if self.action in {'create', 'partial_update'}:
             return TitleWriteSerializer
         return TitleReadSerializer
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    """
+    Выполняет все операции с отзывами.
+    Обрабатывает запросы 'get', 'post', 'patch', 'delete'
+    для эндпоинта api/v1/titles/{title_id}/reviews.
+    """
+
+    permission_classes = (
+        IsAuthenticatedOrReadOnly,
+        IsAuthorOrModeratorOrAdmin
+    )
+    serializer_class = ReviewSerializer
+    http_method_names = ('get', 'post', 'patch', 'delete',)
+
+    def get_title(self):
+        return get_object_or_404(Titles, pk=self.kwargs['title_id'])
+
+    def get_queryset(self):
+        return self.get_title().reviews.select_related(
+            'author').order_by('pub_date')
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, title=self.get_title())
