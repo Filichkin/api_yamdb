@@ -60,6 +60,7 @@ class Title(models.Model):
 
     name = models.TextField(
         verbose_name='Название произведения',
+        max_length=MAX_LENGTH_SLUG,
         db_index=True
     )
     description = models.TextField(
