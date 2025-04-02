@@ -19,6 +19,11 @@ router.register(
     views.ReviewViewSet,
     basename='reviews'
 )
+router.register(
+    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+    views.CommentViewSet,
+    basename='comments'
+)
 
 auth_urls = [
     path('token/', views.get_token, name='get_token'),

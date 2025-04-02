@@ -22,9 +22,10 @@ from .permissions import (
     IsAdminOrReadOnly,
     IsAuthorOrModeratorOrAdmin
 )
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Review, Title
 from .serializers import (
     CategorySerializer,
+    CommentSerializer,
     GenreSerializer,
     OwnerUserSerializer,
     ReviewSerializer,
@@ -194,3 +195,30 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, title=self.get_title())
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """Выполняет все операции с комментариями.
+    Обрабатывает запросы 'get', 'post', 'patch', 'delete' для
+    эндпоинта api/v1/titles/{title_id}/reviews/{review_id}/comments.
+    """
+
+    permission_classes = (
+        IsAuthenticatedOrReadOnly, IsAuthorOrModeratorOrAdmin
+    )
+    serializer_class = CommentSerializer
+    http_method_names = ('get', 'post', 'patch', 'delete',)
+
+    def get_review(self):
+        title_id = self.kwargs['title_id']
+        review_id = self.kwargs['review_id']
+        return get_object_or_404(Review, pk=review_id, title_id=title_id)
+
+    def get_queryset(self):
+        return self.get_review().comments.order_by('pub_date')
+
+    def perform_create(self, serializer):
+        serializer.save(
+            author=self.request.user,
+            review=self.get_review()
+        )

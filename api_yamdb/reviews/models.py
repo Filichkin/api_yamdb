@@ -157,6 +157,7 @@ class Comment(ReviewCommentModel):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
+        related_name='comments',
         verbose_name='Обзор',
     )
 
@@ -164,6 +165,5 @@ class Comment(ReviewCommentModel):
         self.text[:MAX_LENGTH_TEXT]
 
     class Meta(ReviewCommentModel.Meta):
-        default_related_name = 'comments'
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'

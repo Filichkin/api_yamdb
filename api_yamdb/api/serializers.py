@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from reviews.models import Category, Genre, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.constants import (
     MAX_LENGTH_EMAIL,
     MAX_LENGTH_NAME
@@ -164,3 +164,24 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Вы уже оставили отзыв на данное произведение.'
             )
         return data
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """
+    Возаращает JSON-данные всех полей модели Comment
+    для эндпоинта api/v1/titles/{title_id}/reviews/{review_id}/comments.
+    """
+
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
+
+    class Meta:
+        fields = (
+            'id',
+            'author',
+            'text',
+            'pub_date'
+        )
+        model = Comment
