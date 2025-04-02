@@ -1,26 +1,22 @@
 from django.conf import settings
-from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-
-from .permissions import (
-    IsAdmin,
-)
-from .serializers import (
-    OwnerUserSerializer,
-    SignUpSerializer,
-    TokenSerializer,
-    UserSerializer
-)
+from reviews.models import Category
 from users.models import User
+
+from .permissions import IsAdmin
+from .serializers import (CategorySerializer, OwnerUserSerializer,
+                          SignUpSerializer, TokenSerializer, UserSerializer)
 
 
 @api_view(['POST'])
@@ -100,3 +96,12 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         serializer = OwnerUserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CategoriesViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'

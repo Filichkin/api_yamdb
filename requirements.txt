@@ -15,9 +15,4 @@ PyJWT==2.1.0
 pytest==6.2.4
 pytest-django==4.4.0
 pytest-pythonpath==0.7.3
-pytz==2025.2
-requests==2.26.0
-sqlparse==0.5.3
-toml==0.10.2
-typing_extensions==4.13.0
-urllib3==1.26.20
+
