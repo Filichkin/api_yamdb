@@ -3,18 +3,17 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, Titles
 from users.models import User
 
-from .permissions import IsAdmin
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModeratorOrAdmin
 from .serializers import (CategorySerializer, GenreSerializer,
                           OwnerUserSerializer, SignUpSerializer,
                           TitlesSerializer, TokenSerializer, UserSerializer)
@@ -99,30 +98,42 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class CategoriesViewSet(viewsets.ModelViewSet):
+class CategoriesViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    """Получает данные по эндпоинту /categories/."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
 
 
-class GenreVeiwset(viewsets.ModelViewSet):
+class GenreVeiwset(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    """Получает данные по эндпоинту /genre/."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
 
 
 class TitlesViewset(viewsets.ModelViewSet):
+    """Получает данные по эндпоинту /titles/."""
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthorOrModeratorOrAdmin,)
     filter_backends = (SearchFilter,)
     search_fields = ('name', 'description')
     lookup_field = 'pk'
-    pagination_class = PageNumberPagination
     http_method_names = ('get', 'post', 'patch', 'delete')

@@ -2,10 +2,10 @@ asgiref==3.8.1
 attrs==25.3.0
 certifi==2025.1.31
 charset-normalizer==2.0.12
-Django==4.2.20
-django-filter==25.1
-djangorestframework==3.16.0
-djangorestframework_simplejwt==5.5.0
+Django==3.2
+django-filter==23.1
+djangorestframework==3.12.4
+djangorestframework-simplejwt==4.7.2
 idna==3.10
 iniconfig==2.1.0
 packaging==24.2
@@ -15,9 +15,3 @@ PyJWT==2.1.0
 pytest==6.2.4
 pytest-django==4.4.0
 pytest-pythonpath==0.7.3
-pytz==2025.2
-requests==2.26.0
-sqlparse==0.5.3
-toml==0.10.2
-typing_extensions==4.13.0
-urllib3==1.26.20

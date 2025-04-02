@@ -49,7 +49,7 @@ class OwnerUserSerializer(UserSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ('name', 'slug')
         read_only_fields = ('id',)
 
 
@@ -57,13 +57,27 @@ class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = '__all__'
+        fields = ('name', 'slug')
         read_only_fields = ('id',)
 
 
 class TitlesSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field="name",
+        queryset=Category.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field="name",
+        queryset=Genre.objects.all(),
+        many=True
+    )
 
     class Meta:
         model = Titles
-        fields = '__all__'
-        read_only_fields = ('id',)
+        fields = (
+            "name",
+            "year",
+            "description",
+            "genre",
+            "category"
+        )

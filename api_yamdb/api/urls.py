@@ -13,7 +13,7 @@ router = routers.DefaultRouter()
 router.register('users', views.UserViewSet, basename='users')
 router.register('categories', views.CategoriesViewSet, basename='categories')
 router.register('genres', views.GenreVeiwset, basename='genres')
-router.register('titles', views.UserViewSet, basename='titles')
+router.register('titles', views.TitlesViewset, basename='titles')
 
 
 auth_urls = [
