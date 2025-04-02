@@ -8,14 +8,14 @@
 
 # Локальный запуск проекта.
 
-Клонировать репозиторий и перейти в него в командной строке. Cоздать и активировать виртуальное окружение:
+Клонировать репозиторий и перейти в него в командной строке, затем создать и активировать виртуальное окружение:
 
 ```
 python -m venv venv или python3 -m venv venv
 ```
 
 ```
-source venv/scripts/activate или для MAC OS source venv/bin/activate
+source venv/scripts/activate для Windows или для MAC OS source venv/bin/activate
 ```
 
 Установить зависимости из файла requirements.txt:
@@ -31,7 +31,7 @@ python manage.py migrate или python3 manage.py migrate
 
 ```
 
-Запонить базу данных из файлов csv:
+Заполнить базу данных из файлов csv:
 
 ```
 python manage.py migrate или python3 manage.py csv_upload
