@@ -15,8 +15,13 @@ from reviews.models import Category
 from users.models import User
 
 from .permissions import IsAdmin
-from .serializers import (CategorySerializer, OwnerUserSerializer,
-                          SignUpSerializer, TokenSerializer, UserSerializer)
+from .serializers import (
+    CategorySerializer,
+    OwnerUserSerializer,
+    SignUpSerializer,
+    TokenSerializer,
+    UserSerializer
+)
 
 
 @api_view(['POST'])

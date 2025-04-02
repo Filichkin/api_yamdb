@@ -1,7 +1,7 @@
-from .validations import validations_year
 from django.db import models
 
-from .constants import MAX_LENGTH_SLUG, MAX_LENGTH_TITLE, MAX_YEAR, MIN_YEAR
+from .constants import MAX_LENGTH_SLUG, MAX_LENGTH_TITLE
+from .validations import validations_year
 
 
 class BaseClass(models.Model):
@@ -17,7 +17,8 @@ class BaseClass(models.Model):
         max_length=MAX_LENGTH_SLUG,
         unique=True,
         help_text='Идентификатор страницы для URL; разрешены символы латиницы,'
-        'цифры, дефис и подчёркивание, значение должно быть уникальным.'
+                  'цифры, дефис и подчёркивание, '
+                  'значение должно быть уникальным.'
     )
 
     class Meta:
