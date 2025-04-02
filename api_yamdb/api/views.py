@@ -40,6 +40,10 @@ from users.models import User
 
 @api_view(['POST'])
 def signup(request):
+    """
+    Позволяет получить код подтверждения на переданный email.
+    Обрабатывает запрос для эндпоинта api/v1/auth/signup.
+    """
     serializer = SignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     try:
@@ -65,6 +69,10 @@ def signup(request):
 
 @api_view(['POST'])
 def get_token(request):
+    """
+    Позволяет получть JWT-токен в обмен на username и confirmation code.
+    Обрабатывает запрос для эндпоинта api/v1/auth/token.
+    """
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = get_object_or_404(
@@ -84,6 +92,10 @@ def get_token(request):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """
+    Обрабатывает все запросы для эндпоинта api/v1/users/.
+    """
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
@@ -100,6 +112,10 @@ class UserViewSet(viewsets.ModelViewSet):
         url_path='me'
     )
     def user_own_account(self, request):
+        """
+        Позволяет получить и изменить данные своей учетной записи.
+        Обрабатывает все запросы для эндпоинта api/v1/me/.
+        """
         user = get_object_or_404(
             User,
             pk=request.user.id
