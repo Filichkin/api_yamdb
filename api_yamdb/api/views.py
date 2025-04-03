@@ -15,11 +15,9 @@ from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, Title
 from users.models import User
 
-from .permissions import IsAdmin, IsAdminOrReadOnly
-from .serializers import (CategorySerializer, GenreSerializer,
-                          OwnerUserSerializer, SignUpSerializer,
-                          TitleReadSerializer, TitleWriteSerializer,
-                          TokenSerializer, UserSerializer)
+from .permissions import IsAdmin
+from .serializers import (CategorySerializer, OwnerUserSerializer,
+                          SignUpSerializer, TokenSerializer, UserSerializer)
 
 
 @api_view(['POST'])
