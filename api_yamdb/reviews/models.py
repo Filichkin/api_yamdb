@@ -47,7 +47,7 @@ class Genre(BaseClass):
         return f'Жанр: {self.name}'
 
 
-class Titles(models.Model):
+class Title(models.Model):
     """Модель произведения (фильма, книги и т.д.)."""
 
     name = models.CharField(

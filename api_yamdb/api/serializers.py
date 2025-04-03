@@ -5,7 +5,7 @@ from users.constants import (
     MAX_LENGTH_NAME
 )
 from users.models import User
-from reviews.models import Category, Genre, Titles
+from reviews.models import Category, Genre, Title
 from users.validators import validate_username
 
 
@@ -49,21 +49,54 @@ class OwnerUserSerializer(UserSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ('name', 'slug')
         read_only_fields = ('id',)
 
 
-class GenreSerializer(serializers.Serializer):
+class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = '__all__'
+        fields = ('name', 'slug')
         read_only_fields = ('id',)
 
 
-class TitlesSerializer(serializers.ModelSerializer):
+class TitleReadSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(read_only=True, many=True)
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
-        model = Titles
-        fields = '__all__'
-        read_only_fields = ('id',)
+        model = Title
+        fields = (
+            'id',
+            'name',
+            'year',
+            'description',
+            'genre',
+            'category',
+            'rating'
+        )
+
+
+class TitlesWriteSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True
+    )
+
+    class Meta:
+        model = Title
+        fields = (
+            'id',
+            'name',
+            'year',
+            'description',
+            'genre',
+            'category'
+        )
