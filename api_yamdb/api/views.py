@@ -2,7 +2,9 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import IntegrityError
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.filters import SearchFilter
@@ -13,10 +15,11 @@ from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, Titles
 from users.models import User
 
-from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModeratorOrAdmin
+from .permissions import IsAdmin, IsAdminOrReadOnly
 from .serializers import (CategorySerializer, GenreSerializer,
                           OwnerUserSerializer, SignUpSerializer,
-                          TitlesSerializer, TokenSerializer, UserSerializer)
+                          TitlesReadSerializer, TitlesWriteSerializer,
+                          TokenSerializer, UserSerializer)
 
 
 @api_view(['POST'])
@@ -104,7 +107,8 @@ class CategoriesViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
-    """Получает данные по эндпоинту /categories/."""
+    """ViewSet для работы с категориями произведений."""
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -119,7 +123,8 @@ class GenreVeiwset(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
-    """Получает данные по эндпоинту /genre/."""
+    """ViewSet для работы с жанрами произведений."""
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -129,11 +134,18 @@ class GenreVeiwset(
 
 
 class TitlesViewset(viewsets.ModelViewSet):
-    """Получает данные по эндпоинту /titles/."""
-    queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
-    permission_classes = (IsAuthorOrModeratorOrAdmin,)
-    filter_backends = (SearchFilter,)
-    search_fields = ('name', 'description')
-    lookup_field = 'pk'
+    """ViewSet для работы с произведениями."""
+
+    queryset = Titles.objects.annotate(
+        rating=Avg('reviews__score')).order_by('name')
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend, SearchFilter)
+    filterset_fields = ('genre__slug', 'category__slug')
+    search_fields = ('name', 'year')
     http_method_names = ('get', 'post', 'patch', 'delete')
+
+    def get_serializer_class(self):
+        """Динамический выбор сериализатора."""
+        if self.action in ('create', 'update', 'partial_update'):
+            return TitlesWriteSerializer
+        return TitlesReadSerializer
