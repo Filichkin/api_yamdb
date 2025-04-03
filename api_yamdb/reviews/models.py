@@ -1,7 +1,7 @@
-from .validations import validations_year
 from django.db import models
 
 from .constants import MAX_LENGTH_SLUG, MAX_LENGTH_TITLE
+from .validations import validations_year
 
 
 class BaseClass(models.Model):
@@ -46,7 +46,7 @@ class Genre(BaseClass):
         return f'Жанр: {self.name}'
 
 
-class Titles(models.Model):
+class Title(models.Model):
     """Модель произведения (фильма, книги и т.д.)."""
 
     name = models.CharField(

@@ -12,13 +12,13 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Category, Genre, Titles
+from reviews.models import Category, Genre, Title
 from users.models import User
 
 from .permissions import IsAdmin, IsAdminOrReadOnly
 from .serializers import (CategorySerializer, GenreSerializer,
                           OwnerUserSerializer, SignUpSerializer,
-                          TitlesReadSerializer, TitlesWriteSerializer,
+                          TitleReadSerializer, TitleWriteSerializer,
                           TokenSerializer, UserSerializer)
 
 
@@ -101,51 +101,47 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class CategoriesViewSet(
+class BaseViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
+    """Базовый ViewSet для категорий и жанров."""
+
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
+
+
+class CategoriesViewSet(BaseViewSet):
     """ViewSet для работы с категориями произведений."""
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
-class GenreVeiwset(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
-):
+class GenreVeiwset(BaseViewSet):
     """ViewSet для работы с жанрами произведений."""
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
-class TitlesViewset(viewsets.ModelViewSet):
+class TitleViewset(viewsets.ModelViewSet):
     """ViewSet для работы с произведениями."""
 
-    queryset = Titles.objects.annotate(
-        rating=Avg('reviews__score')).order_by('name')
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).select_related(
+            'category').order_by('category__name', '-rating')
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_fields = ('genre__slug', 'category__slug')
-    search_fields = ('name', 'year')
     http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
         """Динамический выбор сериализатора."""
         if self.action in ('create', 'update', 'partial_update'):
-            return TitlesWriteSerializer
-        return TitlesReadSerializer
+            return TitleWriteSerializer
+        return TitleReadSerializer

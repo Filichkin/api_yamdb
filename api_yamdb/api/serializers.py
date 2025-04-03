@@ -5,7 +5,7 @@ from users.constants import (
     MAX_LENGTH_NAME
 )
 from users.models import User
-from reviews.models import Category, Genre, Titles
+from reviews.models import Category, Genre, Title
 from users.validators import validate_username
 
 
@@ -61,19 +61,21 @@ class GenreSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
 
-class TitlesReadSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
-    genre = GenreSerializer(many=True)
+class TitleReadSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(read_only=True, many=True)
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
-        model = Titles
+        model = Title
         fields = (
             'id',
             'name',
             'year',
             'description',
             'genre',
-            'category'
+            'category',
+            'rating'
         )
 
 
@@ -89,7 +91,7 @@ class TitlesWriteSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Titles
+        model = Title
         fields = (
             'id',
             'name',
