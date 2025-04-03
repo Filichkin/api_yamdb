@@ -6,6 +6,7 @@ from users.constants import (
 )
 from users.models import User
 from users.validators import validate_username
+from reviews.models import Comment, Response
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -43,3 +44,38 @@ class OwnerUserSerializer(UserSerializer):
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
         read_only_fields = ('role',)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'text', 'author', 'pub_date')
+
+
+class ResponseSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
+    comments = CommentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Response
+        fields = ('id', 'text', 'author', 'score', 'pub_date', 'comments')
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'text', 'author', 'pub_date')
+        read_only_fields = ('author', 'pub_date')

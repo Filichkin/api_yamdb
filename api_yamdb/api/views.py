@@ -7,20 +7,27 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly
+)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from .permissions import (
     IsAdmin,
+    IsAuthorOrModeratorOrAdmin
 )
 from .serializers import (
     OwnerUserSerializer,
     SignUpSerializer,
     TokenSerializer,
-    UserSerializer
+    UserSerializer,
+    ResponseSerializer,
+    CommentSerializer
 )
 from users.models import User
+from reviews.models import Comment
 
 
 @api_view(['POST'])
@@ -100,3 +107,32 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         serializer = OwnerUserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ResponseViewSet(viewsets.ModelViewSet):
+    queryset = Response.objects.all()
+    serializer_class = ResponseSerializer
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        IsAuthorOrModeratorOrAdmin
+    ]
+    pagination_class = PageNumberPagination
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        IsAuthorOrModeratorOrAdmin
+    ]
+
+    def get_queryset(self):
+        review_id = self.kwargs.get('review_id')
+        return Comment.objects.filter(review_id=review_id)
+
+    def perform_create(self, serializer):
+        review_id = self.kwargs.get('review_id')
+        serializer.save(author=self.request.user, review_id=review_id)
