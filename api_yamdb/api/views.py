@@ -23,11 +23,11 @@ from .serializers import (
     SignUpSerializer,
     TokenSerializer,
     UserSerializer,
-    ResponseSerializer,
+    ReviewSerializer,
     CommentSerializer
 )
 from users.models import User
-from reviews.models import Comment
+from reviews.models import Title, Review
 
 
 @api_view(['POST'])
@@ -109,17 +109,23 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ResponseViewSet(viewsets.ModelViewSet):
-    queryset = Response.objects.all()
-    serializer_class = ResponseSerializer
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
     permission_classes = [
         IsAuthenticatedOrReadOnly,
         IsAuthorOrModeratorOrAdmin
     ]
     pagination_class = PageNumberPagination
 
+    def get_title(self):
+        return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+
+    def get_queryset(self):
+        return self.get_title().reviews.select_related(
+            'author').order_by('pub_date')
+
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        serializer.save(author=self.request.user, title=self.get_title())
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -129,10 +135,20 @@ class CommentViewSet(viewsets.ModelViewSet):
         IsAuthorOrModeratorOrAdmin
     ]
 
-    def get_queryset(self):
+    def get_review(self):
+        title_id = self.kwargs.get('title_id')
         review_id = self.kwargs.get('review_id')
-        return Comment.objects.filter(review_id=review_id)
+        return get_object_or_404(
+            Review,
+            pk=review_id,
+            title_id=title_id
+        )
+
+    def get_queryset(self):
+        return self.get_review().comments.order_by('pub_date')
 
     def perform_create(self, serializer):
-        review_id = self.kwargs.get('review_id')
-        serializer.save(author=self.request.user, review_id=review_id)
+        serializer.save(
+            author=self.request.user,
+            review=self.get_review()
+        )

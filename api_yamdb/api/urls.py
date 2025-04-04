@@ -10,7 +10,7 @@ router = DefaultRouter()
 router.register('users', views.UserViewSet, basename='users')
 router.register(
     r'titles/(?P<title_id>\d+)/reviews',
-    views.ResponseViewSet,
+    views.ReviewViewSet,
     basename='reviews'
 )
 router.register(

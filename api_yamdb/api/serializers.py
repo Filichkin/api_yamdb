@@ -6,7 +6,7 @@ from users.constants import (
 )
 from users.models import User
 from users.validators import validate_username
-from reviews.models import Comment, Response
+from reviews.models import Comment, Review
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -28,7 +28,6 @@ class TokenSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = (
@@ -37,7 +36,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class OwnerUserSerializer(UserSerializer):
-
     class Meta:
         model = User
         fields = (
@@ -57,7 +55,7 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'pub_date')
 
 
-class ResponseSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True
@@ -65,17 +63,19 @@ class ResponseSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:
-        model = Response
+        model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date', 'comments')
 
+    def validate(self, data):
+        """Проверка уникальности отзыва пользователя на произведение."""
+        if self.context['request'].method != 'POST':
+            return data
 
-class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        read_only=True
-    )
+        title_id = self.context['view'].kwargs.get('title_id')
+        author = self.context['request'].user
 
-    class Meta:
-        model = Comment
-        fields = ('id', 'text', 'author', 'pub_date')
-        read_only_fields = ('author', 'pub_date')
+        if Review.objects.filter(author=author, title_id=title_id).exists():
+            raise serializers.ValidationError(
+                'Вы уже оставляли отзыв на это произведение.'
+            )
+        return data
