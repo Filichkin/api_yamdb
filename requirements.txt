@@ -6,11 +6,15 @@ Django==3.2
 django-filter==23.1
 djangorestframework==3.12.4
 djangorestframework-simplejwt==4.7.2
+flake8==7.2.0
 idna==3.10
 iniconfig==2.1.0
+mccabe==0.7.0
 packaging==24.2
 pluggy==1.0.0.dev0
 py==1.11.0
+pycodestyle==2.13.0
+pyflakes==3.3.2
 PyJWT==2.1.0
 pytest==6.2.4
 pytest-django==4.4.0
