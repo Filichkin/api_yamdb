@@ -7,7 +7,6 @@ from users.constants import (
 from users.models import User
 from reviews.models import Category, Genre, Title
 from users.validators import validate_username
-from reviews.models import Comment, Review
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -29,6 +28,7 @@ class TokenSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = User
         fields = (
@@ -37,6 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class OwnerUserSerializer(UserSerializer):
+
     class Meta:
         model = User
         fields = (
@@ -45,42 +46,6 @@ class OwnerUserSerializer(UserSerializer):
         read_only_fields = ('role',)
 
 
-class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        read_only=True
-    )
-
-    class Meta:
-        model = Comment
-        fields = ('id', 'text', 'author', 'pub_date')
-
-
-class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        read_only=True
-    )
-    comments = CommentSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date', 'comments')
-
-    def validate(self, data):
-        """Проверка уникальности отзыва пользователя на произведение."""
-        if self.context['request'].method != 'POST':
-            return data
-
-        title_id = self.context['view'].kwargs.get('title_id')
-        author = self.context['request'].user
-
-        if Review.objects.filter(author=author, title_id=title_id).exists():
-            raise serializers.ValidationError(
-                'Вы уже оставляли отзыв на это произведение.'
-            )
-        return data
-=======
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -135,4 +100,3 @@ class TitlesWriteSerializer(serializers.ModelSerializer):
             'genre',
             'category'
         )
-
