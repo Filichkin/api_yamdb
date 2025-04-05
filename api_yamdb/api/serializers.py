@@ -1,4 +1,10 @@
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.db import IntegrityError
+from django.forms import ValidationError
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -21,6 +27,20 @@ class SignUpSerializer(serializers.Serializer):
         max_length=MAX_LENGTH_EMAIL
     )
 
+    def create(self, validated_data):
+        try:
+            user, _ = User.objects.get_or_create(**validated_data)
+            confirmation_code = default_token_generator.make_token(user)
+            send_mail(
+                'Confirmation code',
+                f'Code: {confirmation_code}',
+                settings.EMAIL_HOST,
+                [validated_data.get('email')]
+            )
+            return user
+        except IntegrityError as e:
+            raise serializers.ValidationError({'detail': str(e)})
+
 
 class TokenSerializer(serializers.Serializer):
     """Сериализатор для отправки токена зарегистрированному пользователю."""
@@ -31,6 +51,13 @@ class TokenSerializer(serializers.Serializer):
     )
     confirmation_code = serializers.CharField(required=True)
 
+    def validate(self, data):
+        user = get_object_or_404(User, username=data['username'])
+        confirmation_code = data['confirmation_code']
+        if not default_token_generator.check_token(user, confirmation_code):
+            raise ValidationError('Неверный код подтверждения')
+        return data
+
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для модели класса User."""
@@ -40,17 +67,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
-
-
-class OwnerUserSerializer(UserSerializer):
-    """Сериализатор для запросов по категориям."""
-
-    class Meta:
-        model = User
-        fields = (
-            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
-        )
-        read_only_fields = ('role',)
 
 
 class CategorySerializer(serializers.ModelSerializer):
