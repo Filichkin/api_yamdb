@@ -1,3 +1,4 @@
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -14,7 +15,7 @@ class SignUpSerializer(serializers.Serializer):
 
     username = serializers.CharField(
         max_length=MAX_LENGTH_NAME,
-        validators=(validate_username,)
+        validators=(UnicodeUsernameValidator(), validate_username,)
     )
     email = serializers.EmailField(
         max_length=MAX_LENGTH_EMAIL

@@ -1,17 +1,11 @@
-import re
-
 from django.core.exceptions import ValidationError
+
+from .constants import NOT_ALLOWED_NAMES
 
 
 def validate_username(username):
-    if username.lower() in ('me',):
+    if username.lower() in NOT_ALLOWED_NAMES:
         raise ValidationError(
             f'Зарезервированный логин {username}, нельзя использолвать'
-        )
-    if not re.match(r'^[\w.@+-]+\Z', username):
-        raise ValidationError(
-            'В логине нельзя использовать символы, отличные от букв'
-            'в верхнем и нижнем регистрах, цифр, знаков подчеркивания,'
-            'точки, знаков плюса, минуса и знака (@)'
         )
     return username
