@@ -4,10 +4,12 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from .constants import (
     MAX_LENGTH_NAME,
     MAX_LENGTH_SLUG,
-    MAX_LENGTH_TEXT
+    MAX_LENGTH_TEXT,
+    MAX_SCORE,
+    MIN_SCORE
 )
 from users.models import User
-from .validators import validate_for_year, validate_slug
+from .validators import validate_for_year
 
 
 class CategoryGenreModel(models.Model):
@@ -16,7 +18,6 @@ class CategoryGenreModel(models.Model):
     slug = models.SlugField(
         verbose_name='Cлаг',
         max_length=MAX_LENGTH_SLUG,
-        validators=(validate_slug,),
         unique=True,
         db_index=True
     )
@@ -68,7 +69,7 @@ class Title(models.Model):
         null=True,
         blank=True
     )
-    year = models.PositiveSmallIntegerField(
+    year = models.IntegerField(
         verbose_name='Год',
         validators=[validate_for_year]
     )
@@ -130,13 +131,10 @@ class Review(ReviewCommentModel):
     score = models.PositiveSmallIntegerField(
         verbose_name='Оценка',
         validators=[
-            MinValueValidator(1),
-            MaxValueValidator(10)
+            MinValueValidator(MIN_SCORE),
+            MaxValueValidator(MAX_SCORE)
         ]
     )
-
-    def __str__(self):
-        return self.text[:MAX_LENGTH_TEXT]
 
     class Meta(ReviewCommentModel.Meta):
         default_related_name = 'reviews'
@@ -147,6 +145,9 @@ class Review(ReviewCommentModel):
                 fields=['author', 'title'], name='author_title_connection'
             )
         ]
+
+    def __str__(self):
+        return self.text[:MAX_LENGTH_TEXT]
 
 
 class Comment(ReviewCommentModel):
@@ -162,9 +163,9 @@ class Comment(ReviewCommentModel):
         verbose_name='Обзор',
     )
 
-    def __str__(self):
-        self.text[:MAX_LENGTH_TEXT]
-
     class Meta(ReviewCommentModel.Meta):
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        self.text[:MAX_LENGTH_TEXT]
