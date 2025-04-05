@@ -5,6 +5,7 @@ from users.constants import (
     MAX_LENGTH_NAME
 )
 from users.models import User
+from reviews.models import Category, Genre, Title
 from users.validators import validate_username
 from reviews.models import Comment, Review
 
@@ -79,3 +80,59 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Вы уже оставляли отзыв на это произведение.'
             )
         return data
+=======
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ('name', 'slug')
+        read_only_fields = ('id',)
+
+
+class GenreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Genre
+        fields = ('name', 'slug')
+        read_only_fields = ('id',)
+
+
+class TitleReadSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(read_only=True, many=True)
+    rating = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Title
+        fields = (
+            'id',
+            'name',
+            'year',
+            'description',
+            'genre',
+            'category',
+            'rating'
+        )
+
+
+class TitlesWriteSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True
+    )
+
+    class Meta:
+        model = Title
+        fields = (
+            'id',
+            'name',
+            'year',
+            'description',
+            'genre',
+            'category'
+        )
+

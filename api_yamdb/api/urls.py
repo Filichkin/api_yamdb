@@ -19,6 +19,10 @@ router.register(
     basename='comments'
 )
 
+router.register('categories', views.CategoriesViewSet, basename='categories')
+router.register('genres', views.GenreVeiwset, basename='genres')
+router.register('titles', views.TitlesViewset, basename='titles')
+
 auth_urls = [
     path('token/', views.get_token, name='get_token'),
     path('signup/', views.signup, name='signup'),
