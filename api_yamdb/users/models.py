@@ -10,8 +10,15 @@ from .constants import (
 from .validators import validate_username
 
 
+class UserRole(models.TextChoices):
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
+
+
 class User(AbstractUser):
     """Кастомная модель пользователя."""
+
     username = models.CharField(
         blank=False,
         max_length=MAX_LENGTH_NAME,
@@ -42,7 +49,7 @@ class User(AbstractUser):
     role = models.CharField(
         choices=ROLE_CHOICES,
         max_length=MAX_LENGTH_ROLE,
-        default='user',
+        default=UserRole.USER,
         verbose_name='Роль'
     )
 
@@ -52,13 +59,13 @@ class User(AbstractUser):
     @property
     def is_admin(self):
         return (
-            self.role == 'admin'
+            self.role == UserRole.ADMIN
             or self.is_superuser
         )
 
     @property
     def is_moderator(self):
-        return self.role == 'moderator'
+        return self.role == UserRole.MODERATOR
 
     class Meta:
         ordering = ('id',)
