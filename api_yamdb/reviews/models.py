@@ -69,7 +69,7 @@ class Title(models.Model):
         null=True,
         blank=True
     )
-    year = models.IntegerField(
+    year = models.SmallIntegerField(
         verbose_name='Год',
         validators=[validate_for_year]
     )
