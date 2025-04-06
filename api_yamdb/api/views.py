@@ -1,3 +1,6 @@
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
@@ -41,7 +44,14 @@ def signup(request):
     """
     serializer = SignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    serializer.save()
+    user = serializer.save()
+    confirmation_code = default_token_generator.make_token(user)
+    send_mail(
+        'Confirmation code',
+        f'Code: {confirmation_code}',
+        settings.EMAIL_HOST,
+        [serializer.validated_data.get('email')]
+    )
     return Response(
         serializer.validated_data, status=status.HTTP_200_OK
     )

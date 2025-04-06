@@ -1,6 +1,4 @@
-from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import IntegrityError
 from django.forms import ValidationError
@@ -30,13 +28,6 @@ class SignUpSerializer(serializers.Serializer):
     def create(self, validated_data):
         try:
             user, _ = User.objects.get_or_create(**validated_data)
-            confirmation_code = default_token_generator.make_token(user)
-            send_mail(
-                'Confirmation code',
-                f'Code: {confirmation_code}',
-                settings.EMAIL_HOST,
-                [validated_data.get('email')]
-            )
             return user
         except IntegrityError as e:
             raise serializers.ValidationError({'detail': str(e)})
