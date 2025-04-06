@@ -98,17 +98,16 @@ class UserViewSet(viewsets.ModelViewSet):
         Позволяет получить и изменить данные своей учетной записи.
         Обрабатывает все запросы для эндпоинта api/v1/me/.
         """
-        if request.method == 'GET':
-            serializer = UserSerializer(request.user)
-            return Response(serializer.data)
+        serializer = UserSerializer(request.user)
+        if request.method == 'PATCH':
+            serializer = UserSerializer(
+                request.user,
+                data=request.data,
+                partial=True
+            )
+            if serializer.is_valid(raise_exception=True):
+                serializer.save(role=request.user.role)
 
-        serializer = UserSerializer(
-            request.user,
-            data=request.data,
-            partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save(role=request.user.role)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
