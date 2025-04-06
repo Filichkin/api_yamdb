@@ -5,8 +5,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from .constants import (
     MAX_LENGTH_EMAIL,
     MAX_LENGTH_NAME,
-    MAX_LENGTH_ROLE,
-    ROLE_CHOICES
+    MAX_LENGTH_ROLE
 )
 from .validators import validate_username
 
@@ -48,7 +47,7 @@ class User(AbstractUser):
         verbose_name='О себе'
     )
     role = models.CharField(
-        choices=ROLE_CHOICES,
+        choices=UserRole.choices,
         max_length=MAX_LENGTH_ROLE,
         default=UserRole.USER,
         verbose_name='Роль'
@@ -62,6 +61,7 @@ class User(AbstractUser):
         return (
             self.role == UserRole.ADMIN
             or self.is_superuser
+            or self.is_staff
         )
 
     @property
